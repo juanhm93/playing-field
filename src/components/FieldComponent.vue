@@ -74,7 +74,6 @@ const selectedPlayer = (itemPlayer: Player) => {
     (el: Player) => el.ref === itemPlayer.ref
   );
 
-  // player.value = { ...itemPlayer, moved: !moved };
   team.value[playerPosition.value].moved = !moved;
 };
 </script>
@@ -131,7 +130,12 @@ const selectedPlayer = (itemPlayer: Player) => {
   position: relative;
   width: 500px;
   height: 90vh;
-  background-color: green;
+  background: repeating-linear-gradient(
+    #007723,
+    #007723 75px,
+    #179740 75px,
+    #179740 150px
+  );
   border: 15px solid darkcyan;
   display: flex;
   flex-direction: column;
