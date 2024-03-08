@@ -1,7 +1,7 @@
 <script setup lang="ts">
-// onMounted reactive
 import { ref, onMounted } from "vue";
 import { REAL_MADRID } from "../helpers/constains";
+// onMounted reactive
 
 type Player = {
   ref: string;
