@@ -136,7 +136,7 @@ const selectedPlayer = (itemPlayer: Player) => {
     #179740 75px,
     #179740 150px
   );
-  border: 15px solid darkcyan;
+  border: 20px solid darkcyan;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
