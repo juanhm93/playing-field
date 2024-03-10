@@ -1,15 +1,12 @@
 <script setup lang="ts">
-// onMounted reactive
 import { ref, onMounted } from "vue";
 import { REAL_MADRID } from "../helpers/constains";
+import { Player } from '../types/Player.types';
+import ItemPlayer from "./players/ItemPlayer.vue";
+import BoxCreateTeam from "./boxes/BoxCreateTeam.vue";
+// onMounted reactive
 
-type Player = {
-  ref: string;
-  name: string;
-  number: number;
-  position: { x: number; y: number };
-  moved: boolean;
-};
+
 const enable = ref<Boolean>(false);
 const futbol = ref<HTMLElement | null>(null);
 const name = ref<string>("");
@@ -43,8 +40,8 @@ const mouseMove = (event: any) => {
   offsetLeft.value = futbol.value?.offsetLeft || 0;
   offsetTop.value = futbol.value?.offsetTop || 0;
 
-  team.value[playerPosition.value].position.x = clientX - offsetLeft.value - 20;
-  team.value[playerPosition.value].position.y = clientY - offsetTop.value - 20;
+  team.value[playerPosition.value].position.x = clientX - offsetLeft.value - 25;
+  team.value[playerPosition.value].position.y = clientY - offsetTop.value - 25;
 };
 
 // const mouseEnter = (event: any) => {
@@ -52,17 +49,30 @@ const mouseMove = (event: any) => {
 
 //   // futbol.value.addEventListener("mousemove", mouseMove, false);
 // };
+type Options = {
+    name: string;
+    number: number;
+};
 
-const createNewPlayer = () => {
+const createNewPlayer = ({ name, number }: Options) => {
   team.value.push({
-    ref: name.value.split(" ").join("-"),
-    name: name.value,
-    number: 25,
+    ref: name.split(" ").join("-"),
+    name: name,
+    number: number,
     position: { x: 0, y: team.value.length * 25 },
     moved: false,
   });
 
-  name.value = "";
+  // name.value = "";
+  // team.value.push({
+  //   ref: name.value.split(" ").join("-"),
+  //   name: name.value,
+  //   number: 25,
+  //   position: { x: 0, y: team.value.length * 25 },
+  //   moved: false,
+  // });
+
+  // name.value = "";
 };
 
 const selectedPlayer = (itemPlayer: Player) => {
@@ -80,7 +90,8 @@ const selectedPlayer = (itemPlayer: Player) => {
 
 <template>
   <div class="field-component__container">
-    <div class="field-component__added">
+    <box-create-team :create-new-player="createNewPlayer" />
+    <!-- <div class="field-component__added">
       <h1 class="title">Arma tu equipo</h1>
       <input type="text" name="name" id="" v-model="name" />
       <button @click="createNewPlayer">Agregar Jugador</button>
@@ -88,9 +99,10 @@ const selectedPlayer = (itemPlayer: Player) => {
         {{ enable }}
         {{ team[playerPosition].position }}
       </div>
-    </div>
+    </div> -->
     <div ref="futbol" class="field-component__area" @mousemove="mouseMove">
       <!-- @mouseenter="mouseEnter" -->
+      <!-- lineas del campo -->
       <div class="field__area area-top">
         <div class="field__small-area"></div>
       </div>
@@ -100,19 +112,14 @@ const selectedPlayer = (itemPlayer: Player) => {
       <div class="field__area area-bottom">
         <div class="field__small-area"></div>
       </div>
-
-      <div
-        v-for="play in team"
-        :key="play.name"
-        :ref="play.ref"
-        class="player"
-        :class="{ active: play.moved }"
-        :style="`transform: translate(${play.position.x}px, ${play.position.y}px)`"
-        @click="selectedPlayer(play)"
-      >
-        <span>{{ play.number }}</span>
-        <p>{{ play.name }}</p>
-      </div>
+      <!-- lineas del campo -->
+      <item-player 
+        v-for="play in team" 
+        :key="play.name" 
+        :play="play" 
+        :selected-player="selectedPlayer" 
+      /> 
+   
     </div>
   </div>
 </template>
@@ -142,29 +149,6 @@ const selectedPlayer = (itemPlayer: Player) => {
   justify-content: space-between;
 }
 
-.player {
-  width: 25px;
-  height: 25px;
-  /* background-color: aqua; */
-  background-color: white;
-  border-radius: 50%;
-  position: absolute;
-  top: 0;
-  left: 0;
-  cursor: move;
-}
-.player span {
-  font-weight: bold;
-}
-.player p {
-  min-width: 94px;
-  margin-left: -30px;
-  margin-top: 0;
-  color: white;
-}
-.player.active {
-  background-color: brown;
-}
 
 .field-component__added {
   padding: 10px 0;
