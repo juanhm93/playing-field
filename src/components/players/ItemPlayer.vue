@@ -1,8 +1,9 @@
  
 <script setup lang="ts">
 
-    import { defineProps } from 'vue';
+    // import { defineProps } from 'vue';
     import { Player } from '../../types/Player.types';
+
     defineProps<{
         play: Player
         selectedPlayer: Function
