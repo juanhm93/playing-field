@@ -9,7 +9,7 @@ import BoxCreateTeam from "./boxes/BoxCreateTeam.vue";
 
 const enable = ref<Boolean>(false);
 const futbol = ref<HTMLElement | null>(null);
-const name = ref<string>("");
+// const name = ref<string>("");
 // const player = reactive({
 //   ref: "juan-manuel",
 //   name: "Juan manuel",
