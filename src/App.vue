@@ -6,6 +6,7 @@ import FieldComponent from "./components/FieldComponent.vue";
 <template>
   <!-- <HelloWorld msg="Vite + Vue" /> -->
   <FieldComponent />
+  <h2>textos</h2>
 </template>
 
 <style scoped>
