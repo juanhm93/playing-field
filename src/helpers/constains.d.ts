@@ -1,9 +1,11 @@
-// declare module '../helpers/constains' {
-//   const value: object; // Reemplaza 'any' con el tipo adecuado si lo conoces
-//   export default value;
-// }
+import type { Team } from "../types/Team.types";
 
+export const REAL_MADRID: Team;
+export const VINOTINTO: Team;
 
+export const TEAMS: Record<string, Team>;
+
+/*
 export const REAL_MADRID: Array = [
   {
     ref: "Lunin",
@@ -83,3 +85,4 @@ export const REAL_MADRID: Array = [
     moved: false,
   },
 ];
+*/

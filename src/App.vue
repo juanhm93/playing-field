@@ -27,6 +27,7 @@ import FieldComponent from "./components/FieldComponent.vue";
 body {
   overflow: hidden;
 }
+
 .title {
   margin: 5px 0;
 }

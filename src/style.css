@@ -85,3 +85,15 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+
+.alignments-list div {
+  font-weight: bold;
+  transition: color 0.2s;
+}
+
+
+.alignments-list div:hover {
+  color: #646cff;
+  cursor: pointer;
+}
