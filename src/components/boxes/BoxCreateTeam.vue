@@ -9,38 +9,17 @@ const ALIGNMENTS = [
   { key: "five-four-one", label: "5-4-1" },
 ] as const;
 
-const name = ref<string>("");
-const shirtNumber = ref<number>(0);
-const selectedTeamKey = ref<string>("");
-const activeAlignment = ref<string>("four-three-three");
-
-// Sincronizar con el primer equipo disponible al cargar
-watch(
-  () => props.teams,
-  (teams) => {
-    if (teams && Object.keys(teams).length > 0 && !selectedTeamKey.value) {
-      selectedTeamKey.value = Object.keys(teams)[0];
-    }
-  },
-  { immediate: true },
-);
-
-// Marcar la alineación activa: default del equipo al cambiar, o la que el usuario seleccione
-watch(
-  () =>
-    (props.teams[selectedTeamKey.value] as Team | undefined)?.defaultAlignment,
-  (defaultAlign) => {
-    if (defaultAlign) activeAlignment.value = defaultAlign;
-  },
-  { immediate: true },
-);
-
 type Options = {
   name: string;
   number: number;
 };
 
-type BenchPlayer = { ref: string; name: string; number: number; moved?: boolean };
+type BenchPlayer = {
+  ref: string;
+  name: string;
+  number: number;
+  moved?: boolean;
+};
 
 const props = defineProps<{
   teams: Record<string, Team>;
@@ -53,6 +32,30 @@ const props = defineProps<{
   onBenchSubClick: (player: BenchPlayer) => void;
   cancelSubstitution: () => void;
 }>();
+
+const name = ref<string>("");
+const shirtNumber = ref<number>(0);
+const selectedTeamKey = ref<string>("");
+const activeAlignment = ref<string>("four-three-three");
+
+watch(
+  () => props.teams,
+  (teams) => {
+    if (teams && Object.keys(teams).length > 0 && !selectedTeamKey.value) {
+      selectedTeamKey.value = Object.keys(teams)[0];
+    }
+  },
+  { immediate: true },
+);
+
+watch(
+  () =>
+    (props.teams[selectedTeamKey.value] as Team | undefined)?.defaultAlignment,
+  (defaultAlign) => {
+    if (defaultAlign) activeAlignment.value = defaultAlign;
+  },
+  { immediate: true },
+);
 
 const onTeamChange = (event: Event) => {
   const key = (event.target as HTMLSelectElement).value;
@@ -73,265 +76,196 @@ const handleCreate = () => {
   name.value = "";
   shirtNumber.value = 0;
 };
+
+function alignmentChipClass(key: string) {
+  const on = activeAlignment.value === key;
+  return [
+    "cursor-pointer rounded-lg border px-3.5 py-2.5 text-center text-[13px] font-semibold tracking-wide transition-all duration-300 ease-out",
+    on
+      ? "border-[#00e676] bg-[#00e676]/15 text-[#00e676] shadow-[0_0_20px_rgba(0,230,118,0.12)]"
+      : "border-white/12 bg-white/[0.04] text-[#b8c4bc] hover:border-[#00e676]/45 hover:bg-[#00e676]/8 hover:text-[#00e676]",
+  ];
+}
 </script>
 
 <template>
-  <div class="field-component__added">
-    <h1 class="title">Arma tu equipo</h1>
-    <div class="input-container team-select">
-      <label class="input-title" for="team">Equipo</label>
-      <select
-        id="team"
-        class="input-field select-field"
-        :value="selectedTeamKey"
-        @change="onTeamChange"
-      >
-        <option v-for="(teamData, key) in teams" :key="key" :value="key">
-          {{ teamData.name }}
-        </option>
-      </select>
-    </div>
-
-    <div v-if="selectedTeamKey" class="list-bench">
+  <div
+    class="field-component__added flex max-w-[min(100%,380px)] flex-col gap-6 py-2 text-start font-['Barlow',sans-serif] text-[#f4f4f4]"
+  >
+    <header class="space-y-3">
       <div
-        v-for="(player, index) in (benchPlayers ?? [])"
-        :key="player.ref"
-        class="list-bench__item"
-        :class="{
-          'list-bench__item--alt': index % 2 === 1,
-          'list-bench__item--sub-active': substitutionBenchPlayer?.ref === player.ref,
-        }"
+        class="inline-flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[3px] text-[#00e676] before:block before:h-0.5 before:w-7 before:shrink-0 before:bg-[#00e676] before:content-['']"
       >
-        <span class="list-bench__player"
-          >{{ player.name }} ({{ player.number }})</span
+        Tu plantilla
+      </div>
+      <h1
+        class="font-['Bebas_Neue',sans-serif] text-[clamp(32px,5vw,42px)] leading-[0.95] tracking-[2px] text-[#f4f4f4]"
+      >
+        Arma tu <span class="text-[#00e676]">equipo</span>
+      </h1>
+    </header>
+
+    <section class="space-y-2">
+      <label
+        class="block text-[11px] font-semibold uppercase tracking-[2.5px] text-[#7a8a7e]"
+        for="team"
+      >
+        Equipo
+      </label>
+      <div class="group relative">
+        <select
+          id="team"
+          class="w-full cursor-pointer appearance-none rounded-xl border border-white/15 bg-[#0d2e16]/85 py-3 pl-4 pr-11 text-[14px] text-[#f4f4f4] shadow-inner shadow-black/20 transition-all duration-300 ease-out hover:border-[#00e676]/35 focus:border-[#00e676]/60 focus:outline-none focus:ring-2 focus:ring-[#00e676]/35"
+          :value="selectedTeamKey"
+          @change="onTeamChange"
         >
-        <button
-          type="button"
-          class="list-bench__btn"
-          title="Cambio"
-          @click="onBenchSubClick(player)"
+          <option
+            v-for="(teamData, key) in teams"
+            :key="key"
+            class="bg-[#0a1510] py-2 text-[#f4f4f4]"
+            :value="key"
+          >
+            {{ teamData.name }}
+          </option>
+        </select>
+        <span
+          class="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-[#7a8a7e] transition-colors duration-300 group-hover:text-[#00e676]"
+          aria-hidden="true"
         >
           <svg
-            class="list-bench__icon"
+            class="h-4 w-4"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
             stroke-width="2"
           >
-            <path d="M7 16V4M7 4L3 8M7 4L11 8" />
-            <path d="M17 8V20M17 20L21 16M17 20L13 16" />
+            <path d="M6 9l6 6 6-6" />
           </svg>
-        </button>
+        </span>
       </div>
-    </div>
+    </section>
 
-    <!-- <div class="actions-players__sidebar">
-        <button @click="handleCreate">Cambio</button>
-        <button @click="handleCreate">
-          Editar Jugador
-        </button>
-        <button 
-            class="button-danger" 
-            @click="handleCreate"
+    <section v-if="selectedTeamKey" class="space-y-2">
+      <h2
+        class="text-[11px] font-semibold uppercase tracking-[2.5px] text-[#7a8a7e]"
+      >
+        Banca
+      </h2>
+      <div
+        class="overflow-hidden rounded-xl border border-white/10 bg-[#0a1510]/60 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]"
+      >
+        <div
+          v-for="(player, index) in benchPlayers ?? []"
+          :key="player.ref"
+          class="flex items-center justify-between gap-3 px-3 py-2.5 transition-colors duration-200"
+          :class="[
+            index % 2 === 1 ? 'bg-white/[0.04]' : 'bg-white/[0.07]',
+            substitutionBenchPlayer?.ref === player.ref
+              ? 'relative overflow-hidden ring-1 ring-inset ring-[#00e676]/50'
+              : '',
+          ]"
+        >
+          <span
+            v-if="substitutionBenchPlayer?.ref === player.ref"
+            class="pointer-events-none absolute inset-0 overflow-hidden"
+            aria-hidden="true"
           >
-          Eliminar Jugador
-        </button>
-      </div> -->
-    <div v-if="false" class="input__box">
-      <div class="input-container">
-        <label class="input-title" for="name"> Nombre </label>
+            <span
+              class="bench-sweep-shine absolute inset-y-0 w-1/2 bg-gradient-to-r from-transparent via-white/25 to-transparent"
+            />
+          </span>
+          <span class="relative text-[13px] font-medium text-[#e8ebe9]">
+            {{ player.name }}
+            <span class="text-[#7a8a7e]">({{ player.number }})</span>
+          </span>
+          <button
+            type="button"
+            class="relative flex shrink-0 items-center justify-center rounded-lg p-2 text-[#00e676] transition-all duration-200 hover:bg-[#00e676]/15 hover:text-[#5efca8] active:scale-95"
+            title="Cambio"
+            @click="onBenchSubClick(player)"
+          >
+            <svg
+              class="h-[18px] w-[18px]"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M7 16V4M7 4L3 8M7 4L11 8" />
+              <path d="M17 8V20M17 20L21 16M17 20L13 16" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <div v-if="false" class="input__box max-w-[350px]">
+      <div class="mb-4 flex flex-col">
+        <label class="mb-1 font-bold" for="name">Nombre</label>
         <input
-          class="input-field"
+          class="rounded-md border border-[#ccc] p-2.5"
           type="text"
           name="name"
           id="name"
           v-model="name"
         />
       </div>
-      <div class="input-container">
-        <label class="input-title" for="shirt"> Numero de camiseta </label>
+      <div class="mb-4 flex flex-col">
+        <label class="mb-1 font-bold" for="shirt">Numero de camiseta</label>
         <input
-          class="input-field"
+          class="rounded-md border border-[#ccc] p-2.5"
           type="text"
           name="shirt"
           id="shirt"
           v-model.number="shirtNumber"
         />
       </div>
-      <div class="button-add">
-        <button @click="handleCreate">Agregar Jugador</button>
+      <div>
+        <button
+          type="button"
+          class="mr-2.5 rounded bg-[darkcyan] px-3 py-2 text-white"
+          @click="handleCreate"
+        >
+          Agregar Jugador
+        </button>
       </div>
     </div>
-    <!-- <div class="field-component__data">
-        {{ enable }}
-        {{ team[playerPosition].position }}
-      </div> -->
-    <div class="field_component__alignment">
-      <h3>Alineaciones Posibles</h3>
-      <div class="alignments-list">
-        <div
+
+    <section class="space-y-3 border-t border-white/10 pt-5">
+      <h2
+        class="font-['Bebas_Neue',sans-serif] text-[22px] tracking-[1.5px] text-[#f4f4f4]"
+      >
+        Alineaciones <span class="text-[#00e676]">posibles</span>
+      </h2>
+      <p class="text-[12px] leading-relaxed text-[#7a8a7e]">
+        Elige una formación; el campo se actualizará al instante.
+      </p>
+      <div class="grid grid-cols-2 gap-2 sm:grid-cols-2">
+        <button
           v-for="align in ALIGNMENTS"
           :key="align.key"
-          :class="{
-            'alignments-list__item--active': activeAlignment === align.key,
-          }"
+          type="button"
+          :class="alignmentChipClass(align.key)"
           @click="onAlignClick(align.key)"
         >
           {{ align.label }}
-        </div>
+        </button>
       </div>
-    </div>
+    </section>
   </div>
 </template>
 
 <style scoped>
-.field-component__added {
-  padding: 10px 0;
-  text-align: start;
+.bench-sweep-shine {
+  animation: bench-sweep-shine 1.5s ease-in-out infinite;
 }
 
-.field-component__added button {
-  margin-right: 10px;
-  color: white;
-  background-color: darkcyan;
-}
-
-.field-component__added .button-danger {
-  background-color: red;
-}
-
-.button-add {
-  margin-right: 10px;
-}
-
-.input__box {
-  max-width: 350px;
-}
-
-/* Estilo base para el contenedor del input */
-.input-container {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 15px;
-  /* Espacio entre inputs */
-}
-
-/* Estilo base para el título */
-.input-title {
-  font-weight: bold;
-  /* Texto en negrita */
-}
-
-/* Estilo base para el input */
-.input-field {
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
-}
-
-/* Chevron como background: ::after no funciona en select nativo */
-.select-field {
-  cursor: pointer;
-  background-color: white;
-  min-width: 180px;
-  padding-right: 36px;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 10px center;
-  background-size: 16px;
-}
-
-/* Lista de banca - estilo clásico */
-.list-bench {
-  /* padding: 10px; */
-  /* border: 1px solid #ddd; */
-  border-radius: 5px;
-  background: #f8f8f8;
-  margin-bottom: 15px;
-}
-
-.list-bench__item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 10px;
-  /* border-radius: 4px; */
-}
-
-.list-bench__item {
-  background: rgba(0, 139, 139, 0.42);
-}
-
-.list-bench__item--alt {
-  background: rgba(0, 139, 139, 0.16);
-}
-
-.list-bench__item--sub-active {
-  position: relative;
-  overflow: hidden;
-}
-
-.list-bench__item--sub-active::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 50%;
-  height: 100%;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(255, 255, 255, 0.4),
-    transparent
-  );
-  animation: sweep-left-to-right 1.5s ease-in-out infinite;
-  pointer-events: none;
-}
-
-@keyframes sweep-left-to-right {
+@keyframes bench-sweep-shine {
   0% {
-    left: -100%;
+    transform: translateX(-100%);
   }
   100% {
-    left: 150%;
+    transform: translateX(350%);
   }
-}
-
-.list-bench__player {
-  font-weight: 500;
-}
-
-.list-bench__btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 6px;
-  border: none;
-  background: transparent;
-  color: darkcyan;
-  cursor: pointer;
-  border-radius: 4px;
-  transition: background 0.2s;
-}
-
-.list-bench__btn:hover {
-  background: rgba(0, 139, 139, 0.2);
-}
-
-.list-bench__icon {
-  width: 18px;
-  height: 18px;
-}
-
-/* Alineaciones: active = mismo estilo que hover */
-.alignments-list div {
-  cursor: pointer;
-}
-
-.alignments-list__item--active {
-  color: #646cff;
 }
 </style>

@@ -11,7 +11,10 @@ import { Player } from "../types/Player.types";
 import ItemPlayer from "./players/ItemPlayer.vue";
 import BoxCreateTeam from "./boxes/BoxCreateTeam.vue";
 
-const ALIGNMENTS_MAP: Record<string, Array<{ position: { x: number; y: number } }>> = {
+const ALIGNMENTS_MAP: Record<
+  string,
+  Array<{ position: { x: number; y: number } }>
+> = {
   "four-three-three": FOUR_THREE_THREE,
   "four-four-two": FOUR_FOUR_TWO,
   "four-two-three-one": FOUR_TWO_THREE_ONE,
@@ -32,12 +35,19 @@ const animatePosition = ref<boolean>(false);
 const ALIGN_TRANSITION_MS = 400;
 
 const team = ref<Player[]>([]);
-const benchPlayers = ref<Array<{ ref: string; name: string; number: number; moved: boolean }>>([]);
+const benchPlayers = ref<
+  Array<{ ref: string; name: string; number: number; moved: boolean }>
+>([]);
 const playerPosition = ref<number>(0);
 
 // Modo sustitución: al hacer cambio, bench player seleccionado entra, field player sale
 const substitutionMode = ref<boolean>(false);
-const substitutionBenchPlayer = ref<{ ref: string; name: string; number: number; moved: boolean } | null>(null);
+const substitutionBenchPlayer = ref<{
+  ref: string;
+  name: string;
+  number: number;
+  moved: boolean;
+} | null>(null);
 
 // Construye jugadores con posiciones desde la alineación del equipo
 const buildPlayersFromTeam = (teamKey: string): Player[] => {
@@ -95,11 +105,10 @@ onUnmounted(() => {
 
 const mouseMove = (event: MouseEvent) => {
   if (!enable.value || !futbol.value) return;
-  const offsetLeft = futbol.value.offsetLeft || 0;
-  const offsetTop = futbol.value.offsetTop || 0;
-
-  const xPx = event.clientX - offsetLeft - 14;
-  const yPx = event.clientY - offsetTop - 14;
+  // getBoundingClientRect alinea con clientX/Y (viewport); offsetLeft/Top es relativo al offsetParent y falla con el marco/padding.
+  const rect = futbol.value.getBoundingClientRect();
+  const xPx = event.clientX - rect.left - 8;
+  const yPx = event.clientY - rect.top - 8;
 
   const xRel = Math.max(0, Math.min(1, xPx / fieldWidth.value));
   const yRel = Math.max(0, Math.min(1, yPx / fieldHeight.value));
@@ -140,7 +149,12 @@ const setNewAlign = (align: string) => {
   }, ALIGN_TRANSITION_MS);
 };
 
-const onBenchSubClick = (benchPlayer: { ref: string; name: string; number: number; moved?: boolean }) => {
+const onBenchSubClick = (benchPlayer: {
+  ref: string;
+  name: string;
+  number: number;
+  moved?: boolean;
+}) => {
   if (substitutionBenchPlayer.value?.ref === benchPlayer.ref) {
     substitutionMode.value = false;
     substitutionBenchPlayer.value = null;
@@ -172,7 +186,9 @@ const selectedPlayer = (itemPlayer: Player) => {
     };
 
     // Sale el titular a la banca
-    const benchIndex = benchPlayers.value.findIndex((b) => b.ref === incomingBench.ref);
+    const benchIndex = benchPlayers.value.findIndex(
+      (b) => b.ref === incomingBench.ref,
+    );
     if (benchIndex !== -1) {
       benchPlayers.value[benchIndex] = {
         ref: outgoingPlayer.ref,
@@ -195,13 +211,17 @@ const selectedPlayer = (itemPlayer: Player) => {
   if (!moved) enable.value = true;
   else enable.value = false;
 
-  playerPosition.value = team.value.findIndex((el: Player) => el.ref === itemPlayer.ref);
+  playerPosition.value = team.value.findIndex(
+    (el: Player) => el.ref === itemPlayer.ref,
+  );
   team.value[playerPosition.value].moved = !moved;
 };
 </script>
 
 <template>
-  <div class="field-component__container">
+  <div
+    class="field-component__container grid grid-cols-1 gap-5 font-['Barlow',sans-serif] min-[900px]:grid-cols-2 min-[900px]:items-start min-[900px]:gap-6"
+  >
     <box-create-team
       :teams="TEAMS"
       :bench-players="benchPlayers"
@@ -213,75 +233,64 @@ const selectedPlayer = (itemPlayer: Player) => {
       :on-bench-sub-click="onBenchSubClick"
       :cancel-substitution="cancelSubstitution"
     />
-    <!-- <div class="field-component__added">
-      <h1 class="title">Arma tu equipo</h1>
-      <input type="text" name="name" id="" v-model="name" />
-      <button @click="createNewPlayer">Agregar Jugador</button>
-      <div class="field-component__data">
-        {{ enable }}
-        {{ team[playerPosition].position }}
-      </div>
-    </div> -->
-    <div ref="futbol" class="field-component__area" @mousemove="mouseMove">
-      <!-- @mouseenter="mouseEnter" -->
-      <!-- lineas del campo -->
-      <div class="field__area area-top">
-        <div class="field__small-area"></div>
-      </div>
-      <div class="field__half-moon half-moon-top"></div>
-      <div class="field__moon"></div>
-      <div class="field__half-moon half-moon-bottom"></div>
-      <div class="field__area area-bottom">
-        <div class="field__small-area"></div>
-      </div>
-      <!-- lineas del campo -->
-      <item-player
-        v-for="play in team"
-        :key="play.ref"
-        :play="play"
-        :field-width="fieldWidth"
-        :field-height="fieldHeight"
-        :animate-position="animatePosition"
-        :team-colors="teamColors"
-        :substitution-mode="substitutionMode"
-        :selected-player="selectedPlayer"
+    <div
+      class="relative shrink-0 rounded-2xl border border-white/10 bg-[linear-gradient(165deg,rgba(13,46,22,0.55)_0%,rgba(5,13,7,0.92)_100%)] p-2 shadow-[0_24px_56px_rgba(0,0,0,0.55)] ring-1 ring-white/[0.05]"
+    >
+      <div
+        class="pointer-events-none absolute inset-x-4 top-2 z-0 h-px bg-gradient-to-r from-transparent via-[#00e676]/40 to-transparent"
+        aria-hidden="true"
       />
+      <div
+        ref="futbol"
+        class="field-component__area relative z-[1] overflow-hidden rounded-xl"
+        @mousemove="mouseMove"
+      >
+        <div class="field__area area-top">
+          <div class="field__small-area"></div>
+        </div>
+        <div class="field__half-moon half-moon-top"></div>
+        <div class="field__moon"></div>
+        <div class="field__half-moon half-moon-bottom"></div>
+        <div class="field__area area-bottom">
+          <div class="field__small-area"></div>
+        </div>
+        <item-player
+          v-for="play in team"
+          :key="play.ref"
+          :play="play"
+          :field-width="fieldWidth"
+          :field-height="fieldHeight"
+          :animate-position="animatePosition"
+          :team-colors="teamColors"
+          :substitution-mode="substitutionMode"
+          :selected-player="selectedPlayer"
+        />
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.field-component__container {
-  display: grid;
-  grid-template-rows: auto;
-  grid-template-columns: repeat(2, 1fr);
-  grid-gap: 10px;
-  grid-auto-rows: minmax(200px, auto);
-}
-
 .field-component__area {
-  position: relative;
+  --line-color: rgba(244, 244, 244, 0.42);
+  --moon-width: 100px;
   width: 500px;
   height: 90vh;
-  background: repeating-linear-gradient(
-    #007723,
-    #007723 75px,
-    #179740 75px,
-    #179740 150px
-  );
-  border: 20px solid darkcyan;
+  max-height: min(90vh, 820px);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-}
-
-.field-component__added {
-  padding: 10px 0;
-}
-.field-component__added button {
-  margin: 0 10px;
-  color: white;
-  background-color: darkcyan;
+  background: repeating-linear-gradient(
+    180deg,
+    #0d3d1e 0,
+    #0d3d1e 74px,
+    #116b28 74px,
+    #116b28 148px
+  );
+  box-shadow:
+    inset 0 0 100px rgba(0, 0, 0, 0.28),
+    inset 0 1px 0 rgba(0, 230, 118, 0.08),
+    0 0 0 1px rgba(0, 230, 118, 0.14);
 }
 /* field__area */
 .field__area {

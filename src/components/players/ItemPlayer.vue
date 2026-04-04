@@ -37,8 +37,8 @@ const positionPx = computed(() => {
     }"
     @click="selectedPlayer(play)"
   >
-    <span>{{ play.number }}</span>
-    <p>{{ play.name }}</p>
+    <span class="player__number">{{ play.number }}</span>
+    <p class="player__name">{{ play.name }}</p>
   </div>
 </template>
 
@@ -52,21 +52,44 @@ const positionPx = computed(() => {
   top: 0;
   left: 0;
   cursor: move;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
 /* Transición suave solo al cambiar alineación (setNewAlign), no al arrastrar */
 .player--animate {
   transition: transform 0.4s ease-out;
 }
-.player span {
-  font-weight: bold;
-  color: var(--player-accent, darkcyan);
+
+.player__number {
+  font-weight: 700;
+  font-size: 11px;
+  line-height: 1;
+  color: var(--player-accent, #050d07);
+  text-align: center;
 }
-.player p {
-  min-width: 94px;
-  margin-left: -30px;
+
+.player__name {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
   margin-top: 5px;
-  color: white;
+  min-width: 72px;
+  max-width: 118px;
+  padding: 0 2px;
+  text-align: center;
+  font-size: 10px;
+  line-height: 1.2;
+  font-weight: 600;
+  color: #f4f4f4;
+  text-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.9),
+    0 0 12px rgba(5, 13, 7, 0.75);
+  pointer-events: none;
 }
 /* Modo arrastrar: jugador seleccionado para mover */
 .player.active {
